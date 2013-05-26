@@ -26,8 +26,9 @@ var app = {
     // Bind any events that are required on startup. Common events are:
     // 'load', 'deviceready', 'offline', and 'online'.
     bindEvents: function() {
-        document.addEventListener('deviceready', this.onDeviceReady, false);
-        document.addEventListener('DOMContentLoaded', this.onDeviceReady, false);
+        var self = this;
+        document.addEventListener('deviceready', function() { self.onDeviceReady(); }, false);
+        // document.addEventListener('DOMContentLoaded', function() { self.onDocumentLoad(); }, false);
 
     },
     // deviceready Event Handler
@@ -35,8 +36,77 @@ var app = {
     // The scope of 'this' is the event. In order to call the 'receivedEvent'
     // function, we must explicity call 'app.receivedEvent(...);'
     onDeviceReady: function() {
+        var self = this;
         //Device is ready
-        var map = L.mapbox.map('map', 'examples.map-4l7djmvo')
-        .setView([40, -74.50], 9);
+        console.log("OFFLINEMAP : deviceReady");
+
+        var localFileName = 'test.mbtiles';
+        var remoteFile = 'http://dl.dropbox.com/u/14814828/OSMBrightSLValley.mbtiles';
+
+        self.downloadMbTiles(localFileName, remoteFile, self.buildMap);
+    },
+
+    onDocumentLoad : function() {
+        var map = L.mapbox.map('map')
+        .setView([40.6681, -111.9364], 11);
+
+        var layer = L.mapbox.tileLayer("examples.map-20v6611k");
+
+        map.addLayer(layer);
+    },
+
+    downloadMbTiles: function(localFileName, remoteFile, callBack) {
+        var fs;             // file system object
+        var ft;             // TileTransfer object
+        var self = this;
+        
+        console.log('OFFLINEMAP: requesting file system...');
+        window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fileSystem) {
+            console.log('OFFLINEMAP: file system retrieved.');
+            fs = fileSystem;
+
+            // check to see if files already exists
+            var file = fs.root.getFile(localFileName, {create: false}, function () {
+                // file exists
+                console.log('OFFLINEMAP: exists');
+                console.log("OFFLINEMAP: DB" +fs.root.fullPath + '/' + localFileName);
+
+                console.log('OFFLINEMAP: File already exists on device. Building map...');
+
+                callBack(localFileName);
+            }, function () {
+                // file does not exist
+                console.log('OFFLINEMAP: does not exist');
+
+                console.log('OFFLINEMAP :Downloading file ...'+remoteFile);
+
+                console.log('OFFLINEMAP : downloading sqlite file...');
+                ft = new FileTransfer();
+                ft.download(remoteFile, fs.root.fullPath + '/' + localFileName, function (entry) {
+                    console.log('OFFLINEMAP : download complete: ' + entry.fullPath);
+
+                    callBack(localFileName);
+
+                }, function (error) {
+                    console.log('OFFLINEMAP : error with download', error);
+                });
+            });
+        });
+    },
+
+    buildMap : function(localFileName) {
+        console.log("OFFLINEMAP : openDatabase :" + localFileName);
+
+        var db = new sqlitePlugin.openDatabase({name:localFileName});
+
+        console.log("OFFLINEMAP : set map");
+
+        var map = L.mapbox.map('map')
+        .setView([40.6681, -111.9364], 11);
+
+        var layer = new L.TileLayer.MBTiles('', {maxZoom: 14, scheme: 'tms'}, db);
+
+        map.addLayer(layer);
     }
+
 };

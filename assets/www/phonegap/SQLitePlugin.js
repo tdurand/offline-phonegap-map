@@ -3,7 +3,7 @@
   root = this;
   SQLitePlugin = function(openargs, openSuccess, openError) {
     var dbname;
-    console.log("SQLitePlugin");
+    console.log("SQLitePlugin: "+ openargs['name']);
     if (!(openargs && openargs['name'])) {
       throw new Error("Cannot create a SQLitePlugin instance without a db name");
     }
@@ -178,6 +178,7 @@
         res = {
           rows: {
             item: function(i) {
+                // console.log("RESPONSE item:"+i);
               return saveres[i];
             },
             length: saveres.length
