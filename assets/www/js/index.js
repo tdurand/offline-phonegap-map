@@ -104,7 +104,7 @@ var app = {
         var map = L.mapbox.map('map')
         .setView([40.6681, -111.9364], 11);
 
-        var layer = new L.TileLayer.MBTiles('', {maxZoom: 14, scheme: 'tms'}, db);
+        var layer = new L.TileLayer.MBTiles({maxZoom: 14, tms: true}, db);
 
         map.addLayer(layer);
     }
