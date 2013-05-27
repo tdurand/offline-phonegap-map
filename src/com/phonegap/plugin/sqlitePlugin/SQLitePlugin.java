@@ -20,9 +20,8 @@ import java.util.HashMap;
 import org.apache.cordova.api.CordovaPlugin;
 import org.apache.cordova.api.CallbackContext;
 
-import android.content.Context;
+import util.Base64;
 
-import android.util.Base64;
 import android.database.Cursor;
 
 import android.database.sqlite.*;
@@ -353,7 +352,7 @@ public class SQLitePlugin extends CordovaPlugin
                         // for old Android SDK remove lines from HERE:
                         if(android.os.Build.VERSION.SDK_INT >= 11)
                         {
-                            switch(cur.getType (i))
+                            switch(cur.getType(i))
                             {
                                 case Cursor.FIELD_TYPE_NULL:
                                     row.put(key, null);
@@ -368,8 +367,12 @@ public class SQLitePlugin extends CordovaPlugin
                                     row.put(key, cur.getString(i));
                                     break;
                                 case Cursor.FIELD_TYPE_BLOB:
-                                    String blob = new String(Base64.encode(cur.getBlob(i), Base64.DEFAULT));
-                                    row.put(key, blob);
+                                	long startTime = System.currentTimeMillis();
+                                	String base64Img = new String(Base64.encodeToString(cur.getBlob(i),false));
+                                	long endTime = System.currentTimeMillis();
+                                	System.out.println("ENCODING took " + (endTime - startTime) + " milliseconds");
+                                    
+                                    row.put(key, base64Img);
                                     break;
                             }
                         }

@@ -168,17 +168,14 @@
     txself = this;
     successcb = null;
     if (success) {
-      console.log("success not null:" + sql);
       successcb = function(execres) {
         var res, saveres;
-        console.log("executeSql callback:" + JSON.stringify(execres));
         res = void 0;
         saveres = void 0;
         saveres = execres;
         res = {
           rows: {
             item: function(i) {
-                // console.log("RESPONSE item:"+i);
               return saveres[i];
             },
             length: saveres.length

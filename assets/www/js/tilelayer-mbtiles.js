@@ -17,18 +17,13 @@ L.TileLayer.MBTiles = L.TileLayer.extend({
         // var x = 775;
         // var y = 2554;
 
-        console.log("zoom_level: "+ tilePoint.z);
-
         var base64Prefix = 'data:image/png;base64,';
-
-        console.log("OFFLINEMAP  WHERE zoom_level = "+z+" AND tile_column = "+x+" AND tile_row = "+y);
 
         this.mbTilesDB.transaction(function(tx) {
 
             tx.executeSql("SELECT tile_data FROM images INNER JOIN map ON images.tile_id = map.tile_id WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?", [z, x, y], function (tx,res) {
                 if(res.rows.length>0) {
                     var src = base64Prefix + res.rows.item(0).tile_data;
-                    //Return here good but async
                     callBack(src);
                 }
                 else {
@@ -47,6 +42,7 @@ L.TileLayer.MBTiles = L.TileLayer.extend({
     },
 
     _loadTile: function (tile, tilePoint) {
+        
         tile._layer  = this;
         tile.onload  = this._tileOnLoad;
         tile.onerror = this._tileOnError;
